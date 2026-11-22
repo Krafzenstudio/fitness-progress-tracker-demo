@@ -1,0 +1,24 @@
+name: Restore index.html
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore exact index.html bytes
+        run: |
+          set -e
+          ORIG=$(git log --diff-filter=A --format=%H -1 -- "KrafzenStudio_Fitness_Progress_Tracker_v2_DEMO.html")
+          echo "Original commit: $ORIG"
+          git show "$ORIG:KrafzenStudio_Fitness_Progress_Tracker_v2_DEMO.html" > index.html
+          wc -c index.html
+          git hash-object index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then echo "No change"; else git commit -m "Restore index.html to exact uploaded bytes"; git push; fi
